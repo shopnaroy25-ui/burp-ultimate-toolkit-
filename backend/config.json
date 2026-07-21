@@ -1,0 +1,19 @@
+{
+    "proxy_port": 8080,
+    "websocket_port": 8443,
+    "intercept_enabled": true,
+    "exclude_hosts": ["localhost", "127.0.0.1", "*.local"],
+    "include_methods": ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    "max_threads": 100,
+    "request_timeout": 30,
+    "ssl_cert_path": "storage/certs",
+    "max_request_size": 10485760,
+    "log_level": "info",
+    "otp_brute_force_max": 999999,
+    "ai_prediction_enabled": true,
+    "auto_exploit_enabled": false,
+    "rate_limit_requests": 100,
+    "rate_limit_time": 60,
+    "jwt_secret": "super_secret_jwt_key_32_chars_minimum",
+    "api_key": "burp_api_key_2024_secure"
+}
