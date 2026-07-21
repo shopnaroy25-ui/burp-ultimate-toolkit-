@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🛠️ Burp Ultimate Toolkit Pro</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/themes/dark.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.7.4/dist/socket.io.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="nav-left">
+                <button id="menuToggle" class="icon-btn"><i class="fas fa-bars"></i></button>
+                <span class="logo-text">🛠️ Burp Pro</span>
+                <span class="status-badge" id="connectionStatus">
+                    <i class="fas fa-circle" style="color: #4CAF50;"></i> Connected
+                </span>
+            </div>
+            <div class="nav-right">
+                <button class="icon-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
+                <button class="icon-btn" id="fullscreenToggle"><i class="fas fa-expand"></i></button>
+                <button class="icon-btn" id="settingsToggle"><i class="fas fa-cog"></i></button>
+            </div>
+        </nav>
+
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>🛠️ Toolkit</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-view="dashboard">
+                    <i class="fas fa-home"></i> Dashboard
+                </button>
+                <button class="nav-item" data-view="proxy">
+                    <i class="fas fa-network-wired"></i> Proxy
+                </button>
+                <button class="nav-item" data-view="repeater">
+                    <i class="fas fa-repeat"></i> Repeater
+                </button>
+                <button class="nav-item" data-view="intruder">
+                    <i class="fas fa-crosshairs"></i> Intruder
+                </button>
+                <button class="nav-item" data-view="otp-bypass">
+                    <i class="fas fa-unlock"></i> OTP Bypass
+                </button>
+                <button class="nav-item" data-view="ssl">
+                    <i class="fas fa-lock"></i> SSL Manager
+                </button>
+                <button class="nav-item" data-view="ai">
+                    <i class="fas fa-robot"></i> AI Predictor
+                </button>
+                <button class="nav-item" data-view="exploit">
+                    <i class="fas fa-bolt"></i> Auto Exploit
+                </button>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Dashboard View -->
+            <div id="view-dashboard" class="view active">
+                <div class="dashboard-grid">
+                    <div class="stats-card">
+                        <h3>📊 Requests</h3>
+                        <div class="stat-number" id="totalRequests">0</div>
+                        <span>Total intercepted</span>
+                    </div>
+                    <div class="stats-card">
+                        <h3>🔓 OTP Bypass</h3>
+                        <div class="stat-number" id="otpBypassCount">0</div>
+                        <span>Successful bypasses</span>
+                    </div>
+                    <div class="stats-card">
+                        <h3>💥 Exploits</h3>
+                        <div class="stat-number" id="exploitCount">0</div>
+                        <span>Vulnerabilities found</span>
+                    </div>
+                    <div class="stats-card">
+                        <h3>⚡ Performance</h3>
+                        <div class="stat-number" id="responseTime">0ms</div>
+                        <span>Average response time</span>
+                    </div>
+                </div>
+                <div class="dashboard-charts">
+                    <div class="chart-container">
+                        <h3>Request Timeline</h3>
+                        <canvas id="requestChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Security Status</h3>
+                        <canvas id="securityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Proxy View -->
+            <div id="view-proxy" class="view">
+                <div class="toolbar">
+                    <div class="toolbar-left">
+                        <button class="btn btn-toggle" id="interceptToggle">
+                            <i class="fas fa-pause"></i> Intercept ON
+                        </button>
+                        <span class="proxy-info">Proxy: 127.0.0.1:8080</span>
+                    </div>
+                    <div class="toolbar-right">
+                        <button class="btn btn-sm" id="clearRequests"><i class="fas fa-trash"></i> Clear</button>
+                        <button class="btn btn-sm" id="exportRequests"><i class="fas fa-download"></i> Export</button>
+                    </div>
+                </div>
+                <div class="proxy-split">
+                    <div class="request-list" id="requestList"></div>
+                    <div class="request-details" id="requestDetails">
+                        <div class="tabs">
+                            <button class="tab-btn active" data-tab="raw">Raw</button>
+                            <button class="tab-btn" data-tab="headers">Headers</button>
+                            <button class="tab-btn" data-tab="body">Body</button>
+                            <button class="tab-btn" data-tab="response">Response</button>
+                        </div>
+                        <div class="tab-content" id="tabContent">
+                            <pre id="rawContent">Select a request to view details</pre>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-sm btn-success" id="forwardRequest"><i class="fas fa-forward"></i> Forward</button>
+                            <button class="btn btn-sm btn-danger" id="dropRequest"><i class="fas fa-times"></i> Drop</button>
+                            <button class="btn btn-sm btn-primary" id="sendToRepeater"><i class="fas fa-repeat"></i> Send to Repeater</button>
+                            <button class="btn btn-sm btn-warning" id="sendToIntruder"><i class="fas fa-crosshairs"></i> Send to Intruder</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Repeater View -->
+            <div id="view-repeater" class="view">
+                <div class="repeater-container">
+                    <div class="repeater-input">
+                        <div class="repeater-toolbar">
+                            <input type="text" id="repeaterUrl" placeholder="https://example.com/api" class="repeater-url">
+                            <select id="repeaterMethod" class="repeater-method">
+                                <option value="GET">GET</option>
+                                <option value="POST">POST</option>
+                                <option value="PUT">PUT</option>
+                                <option value="DELETE">DELETE</option>
+                                <option value="PATCH">PATCH</option>
+                            </select>
+                            <button class="btn btn-primary" id="repeaterSend"><i class="fas fa-paper-plane"></i> Send</button>
+                        </div>
+                        <div class="repeater-headers">
+                            <textarea id="repeaterHeaders" placeholder="Content-Type: application/json&#10;Authorization: Bearer token" rows="3"></textarea>
+                        </div>
+                        <div class="repeater-body">
+                            <textarea id="repeaterBody" placeholder='{"otp": "123456"}' rows="8"></textarea>
+                        </div>
+                    </div>
+                    <div class="repeater-output">
+                        <div class="repeater-response-header">
+                            <span id="responseStatus">Status: -</span>
+                            <span id="responseTime">Time: -</span>
+                            <span id="responseSize">Size: -</span>
+                        </div>
+                        <div class="repeater-response-body">
+                            <pre id="repeaterResponse"></pre>
+                        </div>
+                    </div>
+                </div>
+                <div class="repeater-history">
+                    <h4>History</h4>
+                    <div id="repeaterHistory"></div>
+                </div>
+            </div>
+
+            <!-- Intruder View -->
+            <div id="view-intruder" class="view">
+                <div class="intruder-config">
+                    <div class="row">
+                        <div class="col">
+                            <label>Target URL</label>
+                            <input type="text" id="intruderTarget" placeholder="https://example.com/verify">
+                        </div>
+                        <div class="col">
+                            <label>Method</label>
+                            <select id="intruderMethod">
+                                <option value="GET">GET</option>
+                                <option value="POST" selected>POST</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <label>OTP Field</label>
+                            <input type="text" id="intruderField" value="otp">
+                        </div>
+                        <div class="col">
+                            <label>Threads (1-100)</label>
+                            <input type="number" id="intruderThreads" value="20" min="1" max="100">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <label>Start Range</label>
+                            <input type="number" id="intruderStart" value="0">
+                        </div>
+                        <div class="col">
+                            <label>End Range</label>
+                            <input type="number" id="intruderEnd" value="999999">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <label>Payload Type</label>
+                            <select id="intruderPayloadType">
+                                <option value="numeric">Numeric (6-digit)</option>
+                                <option value="numeric_4">Numeric (4-digit)</option>
+                                <option value="numeric_8">Numeric (8-digit)</option>
+                                <option value="alphanumeric">Alphanumeric</option>
+                                <option value="fuzzing">Fuzzing</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                        <div class="col">
+                            <label>Custom Payloads</label>
+                            <textarea id="intruderCustomPayloads" rows="3" placeholder="one per line"></textarea>
+                        </div>
+                    </div>
+                    <button class="btn btn-danger btn-lg" id="intruderStart"><i class="fas fa-rocket"></i> Start Attack</button>
+                    <button class="btn btn-warning" id="intruderStop" style="display:none"><i class="fas fa-stop"></i> Stop</button>
+                </div>
+                <div class="intruder-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="intruderProgress" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-stats">
+                        <span id="intruderTotal">Total: 0</span>
+                        <span id="intruderSuccess">Success: 0</span>
+                        <span id="intruderFailed">Failed: 0</span>
+                        <span id="intruderPercent">0%</span>
+                    </div>
+                </div>
+                <div class="intruder-results" id="intruderResults"></div>
+            </div>
+
+            <!-- OTP Bypass View -->
+            <div id="view-otp-bypass" class="view">
+                <div class="otp-bypass-config">
+                    <div class="row">
+                        <div class="col">
+                            <label>Target URL</label>
+                            <input type="text" id="bypassTarget" placeholder="https://example.com/verify">
+                        </div>
+                        <div class="col">
+                            <label>OTP Value</label>
+                            <input type="text" id="bypassOtp" value="123456">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <label>Method</label>
+                            <select id="bypassMethod">
+                                <option value="POST">POST</option>
+                                <option value="GET">GET</option>
+                            </select>
+                        </div>
+                        <div class="col">
+                            <label>Body (JSON)</label>
+                            <input type="text" id="bypassBody" value='{"otp": "123456"}'>
+                        </div>
+                    </div>
+                    <div class="bypass-techniques">
+                        <label>Techniques to Test:</label>
+                        <div class="technique-grid" id="techniqueGrid">
+                            <label><input type="checkbox" checked> Parameter Removal</label>
+                            <label><input type="checkbox" checked> Null Injection</label>
+                            <label><input type="checkbox" checked> Negative Value</label>
+                            <label><input type="checkbox" checked> Race Condition</label>
+                            <label><input type="checkbox" checked> Type Juggling</label>
+                            <label><input type="checkbox" checked> Expiry Manipulation</label>
+                            <label><input type="checkbox" checked> JSON Injection</label>
+                            <label><input type="checkbox" checked> Array Injection</label>
+                            <label><input type="checkbox" checked> Regex Bypass</label>
+                            <label><input type="checkbox" checked> Unicode Homograph</label>
+                            <label><input type="checkbox" checked> Base64 Encoding</label>
+                            <label><input type="checkbox" checked> Hex Encoding</label>
+                            <label><input type="checkbox" checked> SQL Injection</label>
+                            <label><input type="checkbox" checked> XML Injection</label>
+                            <label><input type="checkbox" checked> Session Fixation</label>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-lg" id="bypassStart"><i class="fas fa-unlock"></i> Run All Bypass Techniques</button>
+                </div>
+                <div class="otp-bypass-results" id="bypassResults"></div>
+            </div>
+
+            <!-- SSL Manager View -->
+            <div id="view-ssl" class="view">
+                <div class="ssl-actions">
+                    <button class="btn btn-primary" id="generateCA"><i class="fas fa-key"></i> Generate Root CA</button>
+                    <button class="btn btn-success" id="downloadCA"><i class="fas fa-download"></i> Download CA</button>
+                    <button class="btn btn-info" id="viewPinningGuide"><i class="fas fa-book"></i> Pinning Bypass Guide</button>
+                </div>
+                <div class="ssl-status" id="sslStatus"></div>
+                <div class="ssl-guide" id="sslGuide"></div>
+                <div class="ssl-domain">
+                    <h4>Generate Domain Certificate</h4>
+                    <div class="row">
+                        <div class="col">
+                            <input type="text" id="sslDomain" placeholder="example.com">
+                        </div>
+                        <div class="col">
+                            <input type="text" id="sslSan" placeholder="*.example.com, api.example.com">
+                        </div>
+                        <button class="btn btn-primary" id="generateDomainCert"><i class="fas fa-certificate"></i> Generate</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Predictor View -->
+            <div id="view-ai" class="view">
+                <div class="ai-config">
+                    <h3>AI OTP Predictor</h3>
+                    <div class="row">
+                        <div class="col">
+                            <label>Enter OTPs (comma separated)</label>
+                            <textarea id="aiOtps" rows="3" placeholder="123456, 654321, 111111, 222222"></textarea>
+                        </div>
+                        <div class="col">
+                            <label>Number of predictions</label>
+                            <input type="number" id="aiLimit" value="10">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="aiPredict"><i class="fas fa-brain"></i> Predict</button>
+                    <button class="btn btn-info" id="aiTrain"><i class="fas fa-graduation-cap"></i> Train Model</button>
+                </div>
+                <div class="ai-results" id="aiResults"></div>
+            </div>
+
+            <!-- Auto Exploit View -->
+            <div id="view-exploit" class="view">
+                <div class="exploit-config">
+                    <h3>Auto Exploit Engine</h3>
+                    <div class="row">
+                        <div class="col">
+                            <label>Target URL</label>
+                            <input type="text" id="exploitTarget" placeholder="https://example.com">
+                        </div>
+                        <div class="col">
+                            <label>Scan Depth</label>
+                            <input type="number" id="exploitDepth" value="3" min="1" max="5">
+                        </div>
+                    </div>
+                    <button class="btn btn-danger btn-lg" id="exploitScan"><i class="fas fa-search"></i> Scan for Vulnerabilities</button>
+                    <button class="btn btn-warning" id="exploitRun" style="display:none"><i class="fas fa-bolt"></i> Run Exploit</button>
+                </div>
+                <div class="exploit-results" id="exploitResults"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script src="js/proxy.js"></script>
+    <script src="js/repeater.js"></script>
+    <script src="js/intruder.js"></script>
+    <script src="js/otp-bypass.js"></script>
+    <script src="js/ssl-manager.js"></script>
+    <script src="js/ai-predictor.js"></script>
+    <script src="js/auto-exploit.js"></script>
+    <script src="js/websocket.js"></script>
+    <script src="js/utils.js"></script>
+</body>
+                          </html>
