@@ -1,0 +1,9 @@
+# Create directories with proper permissions
+mkdir -p backend/storage/requests
+mkdir -p backend/storage/certs
+mkdir -p backend/storage/logs
+mkdir -p backend/storage/cache
+mkdir -p backend/storage/training
+
+# Set permissions
+chmod -R 755 backend/storage
